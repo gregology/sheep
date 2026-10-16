@@ -3,7 +3,7 @@ GODOT ?= .tools/godot
 VERSION ?= $(shell git describe --tags --always --dirty 2>/dev/null || echo dev)
 DEMO ?= round
 
-.PHONY: help import test run demo balance shots models sounds export package clean
+.PHONY: help import test run demo balance shots models sounds artwork export package clean
 
 help: ## Show this list
 	@grep -E '^[a-z-]+:.*## ' $(MAKEFILE_LIST) | awk -F':.*## ' '{printf "  make %-9s %s\n", $$1, $$2}'
@@ -34,6 +34,9 @@ shots: import ## Render screenshots of each demo scene into build/shots
 models: ## Rebuild the creature models with Blender (assets/models/*.glb)
 	tools/blender/build_models.sh
 	$(MAKE) import
+
+artwork: import ## Render the Steam library artwork from the game (dist/steam/)
+	tools/make_artwork.sh
 
 sounds: ## Rebuild the CC0 sound effects and music with ffmpeg (assets/audio/)
 	python3 tools/audio/build_sounds.py

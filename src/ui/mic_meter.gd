@@ -37,7 +37,7 @@ func _process(delta: float) -> void:
 func _draw() -> void:
 	var center := Vector2(RADIUS + 12.0, RADIUS + 8.0)
 	var r := RADIUS * (1.0 + 0.2 * sin(_bounce * PI))
-	var on := Mic.available
+	var on := Mic.available and not Mic.is_silent()
 	draw_circle(center + Vector2(0, 7), r, UiKit.SHADOW, true, -1.0, true)
 	draw_circle(center, r, Color(0.98, 0.72, 0.8) if on else Color(0.6, 0.6, 0.65), true, -1.0, true)
 	draw_circle(center, r - 10.0, UiKit.CREAM, true, -1.0, true)

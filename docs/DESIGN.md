@@ -173,13 +173,26 @@ manifest and rerun it.
   display, using lavapipe (software Vulkan). The grass shader avoids a uniform that
   crashes lavapipe; see the comment in `tuft.gdshader`.
 
-## Not yet verified on the real hardware
+## On the Steam Machine
 
-These need a playtest on the Steam Machine:
+`--diagnose` (see `Diagnostics`) writes a report covering the GPU, screen, frame rate,
+controllers and every button press, and what the microphone hears. `--shots` and
+`--quit-at` let a whole check run unattended, and `LaunchArgs` reads options from a
+one-shot file, so all of this can be started through Steam over SSH (see README).
 
-- How SDL and Steam Input order and name five mixed controllers.
-- The USB mic's levels.
-- How much TV sound leaks into the mic.
+Verified on 2026-10-16 (SteamOS 3.8, Navi 33 GPU, 1080p TV):
+
+- `install.sh` installs, adds the Steam shortcut and its artwork, and reinstalls cleanly.
+- Launching from Steam runs under Steam Input with real controllers hidden from SDL.
+- Holds 60 fps at 1920×1080 through a full round.
+- The game opens the USB mic through PipeWire. The mic was sending pure digital
+  silence, which looks like a wireless transmitter switched off or muted, so the game
+  now detects that and crosses out the shout button.
+
+Still to check with the hardware switched on:
+
+- How SDL and Steam Input order and name the five mixed controllers.
+- Real mic levels, calibration, and how much TV sound leaks into the mic.
 - Rumble on the small pads.
 
 ## Next
