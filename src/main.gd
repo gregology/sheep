@@ -58,6 +58,7 @@ func _show_join() -> void:
 	hud.hide_round()
 	game.start_attract()
 	join.visible = true
+	Music.play(&"menu")
 
 
 func _start_round() -> void:
@@ -66,6 +67,7 @@ func _start_round() -> void:
 	celebration.hide_screen()
 	game.start_round()
 	hud.show_round(game)
+	Music.play(&"round")
 
 
 func _on_won(stats: RoundStats) -> void:

@@ -16,6 +16,18 @@ const PINK := Color(0.96, 0.6, 0.7)
 const EYE_WHITE := Color(1, 1, 1)
 const PUPIL := Color(0.08, 0.06, 0.08)
 const GOLD := Color(1.0, 0.8, 0.25)
+const COLLAR := Color(0.92, 0.32, 0.45)
+
+
+## Colours for each material slot of the Blender-made sheep (see ModelPaint).
+static func palette(style: Dictionary) -> Dictionary:
+	var face: Color = style["face"]
+	return {
+		"wool": style["wool"], "face": face, "hoof": face.darkened(0.35),
+		"eye": EYE_WHITE, "pupil": PUPIL, "shine": EYE_WHITE,
+		"blush": PINK, "ear_inner": PINK.lightened(0.15),
+		"bell": GOLD, "collar": COLLAR, "bow": PINK,
+	}
 
 
 func _init(style: Dictionary = WHITE) -> void:

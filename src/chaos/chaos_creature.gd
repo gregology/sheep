@@ -79,6 +79,7 @@ func _physics_process(delta: float) -> void:
 				influence.position = pos
 				sim.add_influence(influence)
 				model.squash(1.0)
+				Sfx.play_at(&"land", Geometry.to_3d(pos), -4.0)
 				Effects.puff(effects, Geometry.to_3d(pos), Color(0.85, 0.95, 0.75), 8, 0.14, 1.2)
 				_on_landed()
 		Phase.ACTIVE:
