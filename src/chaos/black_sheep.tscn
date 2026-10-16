@@ -1,0 +1,6 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://src/chaos/black_sheep.gd" id="1_black_sheep"]
+
+[node name="BlackSheep" type="Node3D"]
+script = ExtResource("1_black_sheep")

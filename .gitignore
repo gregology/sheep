@@ -1,0 +1,12 @@
+# Godot
+.godot/
+*.translation
+export_credentials.cfg
+
+# Local toolchain and build output
+.tools/
+build/
+
+# OS / editor noise
+.DS_Store
+*.swp

@@ -1,0 +1,6 @@
+[gd_resource type="Resource" script_class="MeadowLayout" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://src/world/meadow_layout.gd" id="1_layout"]
+
+[resource]
+script = ExtResource("1_layout")
