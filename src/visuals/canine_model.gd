@@ -29,6 +29,18 @@ const NOSE := Color(0.1, 0.08, 0.1)
 const EYE_WHITE := Color(1, 1, 1)
 const PUPIL := Color(0.06, 0.05, 0.07)
 const TONGUE := Color(0.95, 0.45, 0.55)
+const EAR_INNER := Color(0.96, 0.68, 0.75)
+
+
+## Colours for each material slot of the Blender-made dogs and wolf (see ModelPaint).
+static func palette(breed: StringName, bandana := Color.WHITE) -> Dictionary:
+	var style: Dictionary = STYLES.get(breed, STYLES[&"collie"])
+	var coat: Color = style["coat"]
+	return {
+		"coat": coat, "coat_dark": coat.darkened(0.12), "light": style["light"],
+		"eye": EYE_WHITE, "iris": style["eyes"], "pupil": PUPIL, "shine": EYE_WHITE,
+		"nose": NOSE, "brow": NOSE, "tongue": TONGUE, "ear_inner": EAR_INNER, "bandana": bandana,
+	}
 
 
 func _init(breed: StringName, bandana := Color(0, 0, 0, 0)) -> void:

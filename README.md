@@ -62,9 +62,10 @@ Releases are built by GitHub Actions (see "Making a release" below).
 
 **Family sounds:** drop `.wav`/`.ogg`/`.mp3` recordings into
 `~/.local/share/sheep/family_sounds/<sound>/`. The sound names are `bark`, `baa`, `howl`,
-`boing`, `pop`, `ding`, `star` and `fanfare`. They replace the built-in sounds; with
-several files in a folder, one is picked at random each time. An `.ogg` or `.mp3` in
-`family_sounds/music/` replaces the background music. Press "Reload family sounds"
+`boing`, `land`, `pop`, `ding`, `star`, `fanfare`, `whoosh` and `tick`. They replace the
+built-in sounds; with several files in a folder, one is picked at random each time.
+For music, put `menu.ogg` (join screen) and/or `round.ogg` (playing) in
+`family_sounds/music/`; a single file of any name is used for both. Press "Reload family sounds"
 in settings. These recordings stay on the Steam Machine and are never committed.
 
 ## Development
@@ -78,8 +79,12 @@ make run        # play in a window (keyboard players below)
 make demo       # watch robot dogs herd while a robot chaos player causes trouble
 make balance    # time three robot rounds headless: a quick check after tuning changes
 make shots      # render screenshots without a monitor (slow on software rendering)
+make models     # rebuild the creature models with Blender
+make sounds     # rebuild the CC0 sounds and music with ffmpeg
 make package    # export the Linux build and make the release tarball
 ```
+
+`make demo DEMO=gallery` lines up every creature close to the camera, for checking models.
 
 Keyboard players for testing: **WASD** + Space/E/Q/R, **IJKL** + U/O/Y/P, and
 **arrows** + `.` `/` `,` `;`. Enter is Start and Tab is Back on all three.
@@ -99,5 +104,8 @@ The Release workflow runs the tests, exports the game and attaches
 
 - [Fredoka](https://github.com/hafontia/Fredoka-One) font: SIL Open Font License, see
   `assets/fonts/Fredoka-OFL.txt`.
-- Creature models are built from rounded shapes in code (see `src/visuals/`).
-- Sounds and the music loop are synthesised placeholders for now (see `src/audio/synth.gd`).
+- Creature models are generated in Blender by `tools/blender/build_models.py`.
+- Music and sound effects are public domain (CC0). Music is "Children's March Theme" by
+  Cleyton Kauffman and "Flowerbed Fields" by Zane Little Music (both on OpenGameArt).
+  Sound effects are by Freesound contributors and Kenney. The full list is in
+  [assets/audio/CREDITS.md](assets/audio/CREDITS.md).

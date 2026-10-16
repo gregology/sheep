@@ -119,6 +119,7 @@ func _win() -> void:
 	if chaos:
 		chaos.dismiss()
 	Sfx.play(&"fanfare")
+	Music.duck(2.5)
 	_confetti_burst()
 	for i in 3:
 		get_tree().create_timer(0.4 + i * 0.5).timeout.connect(_confetti_burst)
