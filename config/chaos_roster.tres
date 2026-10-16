@@ -1,0 +1,26 @@
+[gd_resource type="Resource" script_class="ChaosRoster" load_steps=7 format=3]
+
+[ext_resource type="Script" path="res://src/chaos/chaos_roster.gd" id="1_roster"]
+[ext_resource type="Script" path="res://src/chaos/chaos_ability.gd" id="2_ability"]
+[ext_resource type="PackedScene" path="res://src/chaos/black_sheep.tscn" id="3_black_sheep"]
+[ext_resource type="PackedScene" path="res://src/chaos/wolf.tscn" id="4_wolf"]
+
+[sub_resource type="Resource" id="Resource_black_sheep"]
+script = ExtResource("2_ability")
+id = &"black_sheep"
+creature = ExtResource("3_black_sheep")
+buttons = Array[StringName]([&"south", &"west", &"left_shoulder"])
+color = Color(0.62, 0.42, 0.95, 1)
+portrait = &"black_sheep"
+
+[sub_resource type="Resource" id="Resource_wolf"]
+script = ExtResource("2_ability")
+id = &"wolf"
+creature = ExtResource("4_wolf")
+buttons = Array[StringName]([&"east", &"north", &"right_shoulder"])
+color = Color(1, 0.55, 0.25, 1)
+portrait = &"wolf"
+
+[resource]
+script = ExtResource("1_roster")
+abilities = Array[ExtResource("2_ability")]([SubResource("Resource_black_sheep"), SubResource("Resource_wolf")])

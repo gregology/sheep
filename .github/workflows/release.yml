@@ -1,0 +1,39 @@
+name: Release
+
+# Push a tag like v0.2.0 to build the Linux game and attach it to a GitHub release.
+on:
+  push:
+    tags: ["v*"]
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Cache Godot and export templates
+        uses: actions/cache@v4
+        with:
+          path: |
+            .tools
+            ~/.local/share/godot/export_templates
+          key: godot-templates-${{ hashFiles('tools/fetch_godot.sh') }}
+
+      - name: Fetch Godot and export templates
+        run: tools/fetch_godot.sh templates
+
+      - name: Unit tests
+        run: make test
+
+      - name: Build and package
+        run: make package VERSION=${{ github.ref_name }}
+
+      - name: Publish release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release create "${{ github.ref_name }}" build/sheep-${{ github.ref_name }}-linux.tar.gz \
+            --title "Sheep! ${{ github.ref_name }}" --generate-notes

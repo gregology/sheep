@@ -1,0 +1,27 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Cache Godot
+        uses: actions/cache@v4
+        with:
+          path: .tools
+          key: godot-${{ hashFiles('tools/fetch_godot.sh') }}
+
+      - name: Fetch Godot
+        run: tools/fetch_godot.sh
+
+      - name: Import
+        run: make import
+
+      - name: Unit tests
+        run: make test
