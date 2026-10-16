@@ -6,6 +6,7 @@ extends Node
 ##   round       robot dogs herd while a robot chaos player causes trouble
 ##   celebrate   a round where every sheep is already home
 ##   gallery     every creature lined up close to the camera (checking models)
+##   artwork     render the Steam library images (see Artwork) and quit
 ## Add --quit-when-won to exit with the round time (balance checks).
 
 var scenario := ""
@@ -52,6 +53,9 @@ func _ready() -> void:
 			_script = [[0.5, _pen_everyone]]
 		"gallery":
 			_gallery()
+		"artwork":
+			main.join.visible = false
+			add_child(Artwork.new(game))
 
 
 func _physics_process(delta: float) -> void:
@@ -60,7 +64,7 @@ func _physics_process(delta: float) -> void:
 	if quit_when_won and int(before / 30.0) != int(_time / 30.0):
 		var game: Game = main.game
 		print("DEMO_PROGRESS t=%ds penned=%d/%d" % [int(_time), game.sim.penned_count(), game.sim.sheep.size()])
-		if OS.is_debug_build() and "--verbose-demo" in OS.get_cmdline_user_args():
+		if LaunchArgs.has("--verbose-demo"):
 			var loose := game.sim.loose_sheep().map(func(s: SheepState) -> String: return "(%.1f,%.1f)" % [s.pos.x, s.pos.y])
 			var dogs := game.dogs.map(func(d: Dog) -> String: return "(%.1f,%.1f)" % [d.pos.x, d.pos.y])
 			print("   loose=%s dogs=%s" % [", ".join(loose), ", ".join(dogs)])

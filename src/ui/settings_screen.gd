@@ -4,6 +4,7 @@ extends CanvasLayer
 ## numbers and volumes. Changes apply straight away and are saved on close.
 
 signal closed
+signal quit_requested
 
 var _rows: VBoxContainer
 var _first_focus: Control
@@ -40,6 +41,9 @@ class MicLevelBar:
 		draw_rect(Rect2(Vector2(0, 50), Vector2(size.x * detector.alertness, 10)), UiKit.SUN)
 		if not Mic.available:
 			UiKit.draw_text(self, get_theme_default_font(), Vector2(0, 34), "No microphone found", 26, UiKit.CREAM, size.x)
+		elif Mic.is_silent():
+			UiKit.draw_text(self, get_theme_default_font(), Vector2(0, 34),
+				"The microphone is sending pure silence: is it switched on, or muted?", 24, UiKit.CREAM, size.x)
 
 
 func _ready() -> void:
@@ -147,10 +151,22 @@ func _build() -> void:
 		Sfx.play(&"baa"))
 	_row("", reload)
 
+	_section("This machine")
+	var summary := UiKit.label(Diagnostics.system_summary(), 20)
+	summary.horizontal_alignment = HORIZONTAL_ALIGNMENT_LEFT
+	summary.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	summary.custom_minimum_size = Vector2(1100, 0)
+	_rows.add_child(summary)
+
 	var buttons := HBoxContainer.new()
 	buttons.alignment = BoxContainer.ALIGNMENT_CENTER
 	buttons.add_theme_constant_override("separation", 30)
 	_rows.add_child(buttons)
+	var quit := MenuStyle.button("Quit game")
+	quit.pressed.connect(func() -> void:
+		Settings.save()
+		quit_requested.emit())
+	buttons.add_child(quit)
 	var reset := MenuStyle.button("Reset to defaults")
 	reset.pressed.connect(func() -> void:
 		Settings.reset_to_defaults()

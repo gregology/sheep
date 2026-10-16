@@ -1,21 +1,22 @@
 #!/usr/bin/env bash
-# Downloads the newest Sheep! release from GitHub and installs it.
+# Downloads the newest Sheep! release from GitHub and installs it:
+#     ~/Games/sheep/update.sh            (add --force to reinstall the same version)
 #
-# The repository is private, so this needs a GitHub token that can read it:
-# make a fine-grained token (github.com > Settings > Developer settings) with
-# read-only "Contents" access to gregology/sheep, then save it once:
+# No login is needed while the repository is public. If it is ever made private,
+# save a read-only GitHub token once and this script will use it:
 #     mkdir -p ~/.config/sheep && echo YOUR_TOKEN > ~/.config/sheep/github-token
-# After that, from Desktop Mode:   ~/Games/sheep/update.sh
 set -euo pipefail
 
 REPO="${SHEEP_REPO:-gregology/sheep}"
 TOKEN_FILE="${HOME}/.config/sheep/github-token"
 TOKEN="${GITHUB_TOKEN:-$(cat "${TOKEN_FILE}" 2>/dev/null || true)}"
-if [ -z "${TOKEN}" ]; then
-	echo "No GitHub token found. See the instructions at the top of this script." >&2
-	exit 1
-fi
-api() { curl -fsSL -H "Authorization: Bearer ${TOKEN}" -H "X-GitHub-Api-Version: 2022-11-28" "$@"; }
+api() {
+	if [ -n "${TOKEN}" ]; then
+		curl -fsSL -H "Authorization: Bearer ${TOKEN}" -H "X-GitHub-Api-Version: 2022-11-28" "$@"
+	else
+		curl -fsSL -H "X-GitHub-Api-Version: 2022-11-28" "$@"
+	fi
+}
 
 release="$(api "https://api.github.com/repos/${REPO}/releases/latest")"
 tag="$(printf '%s' "${release}" | python3 -c 'import json,sys; print(json.load(sys.stdin)["tag_name"])')"

@@ -14,6 +14,8 @@ const MIN_STARTLE := 0.05
 const BLOCK_SECONDS := 0.01
 const CALIBRATION_QUIET := 3.0
 const CALIBRATION_LOUD := 3.0
+## Seconds of pure digital silence before the mic counts as switched off.
+const SILENCE_AFTER := 2.0
 
 var available := false
 var detector: StartleDetector
@@ -29,6 +31,7 @@ var _hp_last_out := 0.0
 var _self_env_db := -90.0
 var _self_hold := 0.0
 var _calibration_samples: Array[Vector2] = []  # (mic_db, self_db)
+var _silent_for := 0.0
 var _calibration_time := 0.0
 
 
@@ -45,6 +48,12 @@ func _process(delta: float) -> void:
 		_read_frames()
 	if calibrating:
 		_calibration_time += delta
+
+
+## True when the microphone is open but sending nothing but exact zeros: a real
+## microphone always hisses a little, so this means it's switched off or muted.
+func is_silent() -> bool:
+	return available and _silent_for > SILENCE_AFTER
 
 
 ## The game's own sound as it probably arrives at the mic (dB).
@@ -128,6 +137,7 @@ func _read_frames() -> void:
 
 
 func _feed(block_db: float, dt: float) -> void:
+	_silent_for = _silent_for + dt if block_db < -170.0 else 0.0
 	var self_db := self_noise_db()
 	if calibrating:
 		_calibration_samples.append(Vector2(block_db, _self_env_db))

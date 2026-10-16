@@ -6,10 +6,18 @@ set -euo pipefail
 HERE="$(cd "$(dirname "$0")" && pwd)"
 DEST="${HOME}/Games/sheep"
 
+if pgrep -f "${DEST}/sheep.x86_64" >/dev/null 2>&1; then
+	echo "Sheep! is running. Quit it first (Steam button > Exit game), then run this again." >&2
+	exit 1
+fi
+
 mkdir -p "${DEST}"
-cp "${HERE}/sheep.x86_64" "${HERE}/icon.svg" "${HERE}/update.sh" "${HERE}/VERSION" "${DEST}/"
+cp "${HERE}/sheep.x86_64" "${HERE}/update.sh" "${HERE}/steam_artwork.py" "${HERE}/VERSION" "${DEST}/"
 cp "${HERE}"/LICENSE-* "${DEST}/" 2>/dev/null || true
-chmod +x "${DEST}/sheep.x86_64" "${DEST}/update.sh"
+rm -rf "${DEST}/steam"
+cp -r "${HERE}/steam" "${DEST}/steam"
+cp "${HERE}/steam/icon.png" "${DEST}/icon.png"
+chmod +x "${DEST}/sheep.x86_64" "${DEST}/update.sh" "${DEST}/steam_artwork.py"
 
 # A desktop entry, so it shows up in the app menu.
 mkdir -p "${HOME}/.local/share/applications"
@@ -20,7 +28,7 @@ Name=Sheep!
 Comment=Couch co-op sheep herding with a chaos player
 Exec=${DEST}/sheep.x86_64
 Path=${DEST}
-Icon=${DEST}/icon.svg
+Icon=${DEST}/icon.png
 Categories=Game;
 DESKTOP
 
@@ -37,6 +45,7 @@ if command -v steamos-add-to-steam >/dev/null 2>&1; then
 		steamos-add-to-steam "${HOME}/.local/share/applications/sheep.desktop" && \
 			echo "Added to Steam: look under Library > Non-Steam."
 	fi
+	python3 "${DEST}/steam_artwork.py" "${DEST}/steam" "${DEST}/sheep.x86_64" 20 || true
 else
 	echo "Now add it to Steam: Steam > Games > Add a Non-Steam Game to My Library > Sheep!"
 fi
