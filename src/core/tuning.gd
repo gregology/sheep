@@ -83,7 +83,10 @@ extends Resource
 ## Alertness regained per second.
 @export var mic_alertness_recovery: float = 0.12
 @export var mic_highpass_hz: float = 150.0
+## How fast (m/s) a startled sheep bolts off.
 @export var mic_startle_strength: float = 7.0
+## Seconds a startled sheep runs off on its own before it remembers the flock.
+@export var mic_scatter_time: float = 1.2
 ## Quietest the room gets, as the mic hears it. Set by calibration.
 @export var mic_noise_floor_db: float = -55.0
 ## How loud the game's own sound is at the mic relative to what it plays. Set by calibration.

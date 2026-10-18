@@ -74,6 +74,9 @@ Each tick, every loose sheep adds up a desired velocity from:
   behind each cut is solid (`Geometry.CornerCut`), so a sheep shoved in there pops back
   out the front. A sheep pinned against a fence by a dog squeezes out sideways rather
   than being pushed through
+- **bolting:** a noise sends each loose sheep dashing off its own way for
+  `mic_scatter_time`, with flocking switched off while the dash fades, so the flock
+  breaks up and takes a while to drift back together
 - **the gate funnel:** near the gate, a gentle drift inward. It widens late in long
   rounds (`assist_after`)
 

@@ -108,6 +108,7 @@ func _build() -> void:
 	_slider("Sensitivity", 0, 24, 1, 30.0 - t.mic_threshold_db, func(v: float) -> void: t.mic_threshold_db = 30.0 - v)
 	_slider("Gets used to noise after (s)", 0.3, 5.0, 0.1, t.mic_habituation_time, func(v: float) -> void: t.mic_habituation_time = v)
 	_slider("Tires of shouting (per scare)", 0.0, 0.8, 0.05, t.mic_alertness_cost, func(v: float) -> void: t.mic_alertness_cost = v)
+	_slider("Shouts scatter sheep for (s)", 0.2, 3.0, 0.1, t.mic_scatter_time, func(v: float) -> void: t.mic_scatter_time = v)
 	var calibrate := MenuStyle.button("Calibrate (stay quiet, then listen)", 30)
 	calibrate.pressed.connect(_calibrate)
 	_calibrate_status = UiKit.label("Sets how quiet the room is and how loud the game sounds at the mic.", 22)

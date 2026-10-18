@@ -93,8 +93,9 @@ func collide_solid(p: Vector2, radius: float) -> Vector2:
 	return Vector2(clampf(p.x, inner.position.x, inner.end.x), clampf(p.y, inner.position.y, inner.end.y))
 
 
-## A sudden noise: every loose sheep bolts away from its neighbours and hops;
-## penned sheep just hop about. Returns how many loose sheep scattered.
+## A sudden noise: every loose sheep hops and bolts away from its neighbours, each
+## its own way, forgetting to flock until the bolt fades; penned sheep just hop
+## about. Returns how many loose sheep scattered.
 func startle(intensity: float) -> int:
 	var scattered := 0
 	for s in sheep:
@@ -105,8 +106,11 @@ func startle(intensity: float) -> int:
 		var away := s.pos - _neighbour_center(s, tuning.cohesion_radius)
 		if away.length() < 0.1:
 			away = Vector2.RIGHT.rotated(rng.randf() * TAU)
-		away = away.normalized().rotated(rng.randf_range(-0.7, 0.7))
-		s.vel += away * tuning.mic_startle_strength * intensity
+		away = away.normalized().rotated(rng.randf_range(-0.9, 0.9))
+		var oomph := 0.5 + 0.5 * intensity
+		s.bolt = away * tuning.mic_startle_strength * oomph * rng.randf_range(0.75, 1.25)
+		s.bolt_left = maxf(s.bolt_left, tuning.mic_scatter_time * oomph)
+		s.vel += s.bolt
 		s.fear = maxf(s.fear, intensity)
 		scattered += 1
 	return scattered
@@ -186,6 +190,12 @@ func _update_fear(dt: float) -> void:
 
 func _step_loose(s: SheepState, dt: float) -> void:
 	var desired := s.steer
+	# 1 just after a fright, fading to 0: running off alone instead of flocking.
+	var scatter := 0.0
+	if s.bolt_left > 0.0:
+		s.bolt_left = maxf(0.0, s.bolt_left - dt)
+		scatter = minf(1.0, s.bolt_left / tuning.mic_scatter_time)
+		desired += s.bolt * scatter
 	var separation := Vector2.ZERO
 	var center := Vector2.ZERO
 	var heading := Vector2.ZERO
@@ -204,12 +214,12 @@ func _step_loose(s: SheepState, dt: float) -> void:
 	desired += separation * tuning.separation_weight
 	if neighbours > 0:
 		center /= neighbours
-		var bunching := tuning.cohesion_weight * (1.0 + s.fear * tuning.cohesion_fear_bonus)
+		var bunching := tuning.cohesion_weight * (1.0 + s.fear * tuning.cohesion_fear_bonus) * (1.0 - scatter)
 		desired += (center - s.pos).limit_length(1.0) * bunching
-		desired += heading / neighbours * tuning.alignment_weight * maxf(s.fear, s.urge)
+		desired += heading / neighbours * tuning.alignment_weight * maxf(s.fear, s.urge) * (1.0 - scatter)
 	elif s.pos.distance_to(_flock_center) > tuning.cohesion_radius:
 		# All alone: amble back toward the others, as sheep do.
-		desired += (_flock_center - s.pos).normalized() * tuning.graze_speed * tuning.lonely_pull
+		desired += (_flock_center - s.pos).normalized() * tuning.graze_speed * tuning.lonely_pull * (1.0 - scatter)
 
 	if s.fear < 0.15 and s.steer.length() < 0.2:
 		_graze(s, dt)

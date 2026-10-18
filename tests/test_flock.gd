@@ -125,6 +125,15 @@ func test_a_startle_scatters_the_flock() -> void:
 	check(_spread(sim) > before * 1.5, "the flock should spread out (%.2f -> %.2f)" % [before, _spread(sim)])
 
 
+func test_a_loud_noise_keeps_the_flock_apart_for_a_while() -> void:
+	var sim := _sim([Vector2(-4, 0), Vector2(-3, 0.6), Vector2(-5, 0.6), Vector2(-4, -1), Vector2(-4, 1.2),
+		Vector2(-2.8, -0.8), Vector2(-5.2, -0.7), Vector2(-3.4, 1.9)])
+	var before := _spread(sim)
+	sim.startle(1.0)
+	_run(sim, 2.0)
+	check(_spread(sim) > before * 2.0, "two seconds on, the flock should still be scattered (%.2f -> %.2f)" % [before, _spread(sim)])
+
+
 func test_a_dog_cant_push_a_sheep_through_the_fence() -> void:
 	var sim := _sim([Vector2(0, -6.5)])
 	var dog := _dog(Vector2(0, -2))
