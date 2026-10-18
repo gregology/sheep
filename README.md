@@ -76,8 +76,8 @@ in settings. These recordings stay on the Steam Machine and are never committed.
 game can see and the microphone's state.
 
 - If the shout button (the sheep at the bottom left during a round) is crossed out, the
-  microphone wasn't found or is sending pure silence. Check it's plugged in, switched on
-  (wireless mics have a transmitter) and not muted.
+  microphone wasn't found or hasn't sent any sound yet. Check it's plugged in, switched
+  on (wireless mics have a transmitter) and not muted, then shout once.
 - The game only sees Steam Controllers when Steam launches it, so start it from the
   Steam library rather than from Desktop Mode's app menu.
 

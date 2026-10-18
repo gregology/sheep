@@ -110,7 +110,7 @@ static func system_summary() -> String:
 		AudioServer.output_device, AudioServer.get_mix_rate(), AudioServer.get_output_latency() * 1000.0])
 	var mic_state := "NOT available"
 	if Mic.available:
-		mic_state = "open but sending pure silence (switched off or muted?)" if Mic.is_silent() else "working"
+		mic_state = "open, but no sound from it yet (switched off or muted?)" if Mic.is_silent() else "working"
 	lines.append("Microphone: %s, device '%s' of %s" % [mic_state, AudioServer.input_device, AudioServer.get_input_device_list()])
 	var t := Settings.tuning
 	lines.append("Microphone calibration: quiet room %.0f dB, game sound at mic %+.0f dB, scare threshold %.0f dB" % [

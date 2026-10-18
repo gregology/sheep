@@ -43,7 +43,7 @@ class MicLevelBar:
 			UiKit.draw_text(self, get_theme_default_font(), Vector2(0, 34), "No microphone found", 26, UiKit.CREAM, size.x)
 		elif Mic.is_silent():
 			UiKit.draw_text(self, get_theme_default_font(), Vector2(0, 34),
-				"The microphone is sending pure silence: is it switched on, or muted?", 24, UiKit.CREAM, size.x)
+				"No sound from the microphone yet: is it switched on, or muted?", 24, UiKit.CREAM, size.x)
 
 
 func _ready() -> void:
@@ -236,15 +236,33 @@ func _device_picker() -> void:
 	var picker := OptionButton.new()
 	picker.add_theme_font_size_override("font_size", 24)
 	picker.custom_minimum_size = Vector2(560, 56)
+	# Device names can be very long; don't let one stretch the menu off the screen.
+	picker.fit_to_longest_item = false
+	picker.clip_text = true
 	var devices := AudioServer.get_input_device_list()
 	for i in devices.size():
-		picker.add_item(devices[i])
+		picker.add_item(_device_label(devices[i]))
 		if devices[i] == Settings.tuning.mic_device:
 			picker.select(i)
 	picker.item_selected.connect(func(index: int) -> void:
 		Settings.tuning.mic_device = devices[index]
 		Settings.save())
 	_row("Microphone", picker)
+
+
+## A readable name for an audio device:
+## "alsa_input.usb-Jieli_Technology_USB_Composite_Device_4150353832363911-00.mono-fallback"
+## becomes "Jieli Technology USB Composite Device".
+static func _device_label(device: String) -> String:
+	var label := device
+	for prefix in ["alsa_loopback_device.", "alsa_input.", "usb-"]:
+		label = label.trim_prefix(prefix)
+	if label.begins_with("pci-"):
+		return "Built-in sound input"
+	label = label.get_slice(".", 0)  # ".mono-fallback", ".analog-stereo"...
+	var serial := RegEx.create_from_string("([_-][0-9A-Fa-f]{6,})?(-\\d+)?$")
+	label = serial.sub(label, "").replace("_", " ").strip_edges()
+	return label if label != "" else device
 
 
 func _calibrate() -> void:

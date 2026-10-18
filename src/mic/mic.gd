@@ -14,7 +14,8 @@ const MIN_STARTLE := 0.05
 const BLOCK_SECONDS := 0.01
 const CALIBRATION_QUIET := 3.0
 const CALIBRATION_LOUD := 3.0
-## Seconds of pure digital silence before the mic counts as switched off.
+## Seconds of pure digital silence before a mic that has never sent any sound
+## counts as switched off.
 const SILENCE_AFTER := 2.0
 
 var available := false
@@ -32,6 +33,8 @@ var _self_env_db := -90.0
 var _self_hold := 0.0
 var _calibration_samples: Array[Vector2] = []  # (mic_db, self_db)
 var _silent_for := 0.0
+## The input device that has sent real sound (anything but exact zeros) at least once.
+var _heard_from := ""
 var _calibration_time := 0.0
 
 
@@ -50,10 +53,12 @@ func _process(delta: float) -> void:
 		_calibration_time += delta
 
 
-## True when the microphone is open but sending nothing but exact zeros: a real
-## microphone always hisses a little, so this means it's switched off or muted.
+## True when the microphone is open but has sent nothing but exact zeros: a real
+## microphone always hisses a little, so it's switched off or muted. Some wireless
+## mics send exact zeros whenever the room is quiet, so one that has sent any sound
+## at all counts as working.
 func is_silent() -> bool:
-	return available and _silent_for > SILENCE_AFTER
+	return available and _heard_from != AudioServer.input_device and _silent_for > SILENCE_AFTER
 
 
 ## The game's own sound as it probably arrives at the mic (dB).
@@ -137,7 +142,11 @@ func _read_frames() -> void:
 
 
 func _feed(block_db: float, dt: float) -> void:
-	_silent_for = _silent_for + dt if block_db < -170.0 else 0.0
+	if block_db < -170.0:
+		_silent_for += dt
+	else:
+		_silent_for = 0.0
+		_heard_from = AudioServer.input_device
 	var self_db := self_noise_db()
 	if calibrating:
 		_calibration_samples.append(Vector2(block_db, _self_env_db))

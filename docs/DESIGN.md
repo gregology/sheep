@@ -191,9 +191,10 @@ Verified on 2026-10-16 (SteamOS 3.8, Navi 33 GPU, 1080p TV):
 - `install.sh` installs, adds the Steam shortcut and its artwork, and reinstalls cleanly.
 - Launching from Steam runs under Steam Input with real controllers hidden from SDL.
 - Holds 60 fps at 1920×1080 through a full round.
-- The game opens the USB mic through PipeWire. The mic was sending pure digital
-  silence, which looks like a wireless transmitter switched off or muted, so the game
-  now detects that and crosses out the shout button.
+- The game opens the USB mic through PipeWire. It's a wireless mic with a noise gate:
+  it sends exact digital zeros while the room is quiet, and real sound (and real scares)
+  when someone is loud. So the shout button is only crossed out for a mic that has sent
+  nothing but zeros since it was opened.
 
 Still to check with the hardware switched on:
 
