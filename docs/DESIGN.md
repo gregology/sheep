@@ -175,6 +175,10 @@ manifest and rerun it.
 - `make test`: unit tests for the flock, the microphone rules, cooldowns and geometry.
 - `make balance`: robot dogs (`HerdingBot`) play three full rounds against a scripted
   chaos player and report the times. At the time of writing they win in about 1–3 minutes.
+- `make smoke`: exports the game and runs the `screens` demo in it, which goes every
+  way between the join screen, rounds, the party and the pause menu. Some bugs only
+  crash the exported game: using a node after it has been freed is just an error in the
+  editor (watch `make demo`'s output), but in the export it reads freed memory.
 - `make shots`: renders the join screen, a round and the celebration under a virtual
   display, using lavapipe (software Vulkan). The grass shader avoids a uniform that
   crashes lavapipe; see the comment in `tuft.gdshader`.
@@ -185,6 +189,10 @@ manifest and rerun it.
 controllers and every button press, and what the microphone hears. `--shots` and
 `--quit-at` let a whole check run unattended, and `LaunchArgs` reads options from a
 one-shot file, so all of this can be started through Steam over SSH (see README).
+
+The game's log is `~/.local/share/sheep/logs/godot.log` (older runs are kept beside it
+with a timestamp). It's mostly written out as the game quits, so if the game vanished
+and its log is empty, without even the "Godot Engine" line, it crashed.
 
 Verified on 2026-10-16 (SteamOS 3.8, Navi 33 GPU, 1080p TV):
 

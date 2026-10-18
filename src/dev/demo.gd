@@ -5,6 +5,8 @@ extends Node
 ##   join        robots join (two dogs + chaos) and wait on the join screen
 ##   round       robot dogs herd while a robot chaos player causes trouble
 ##   celebrate   a round where every sheep is already home
+##   screens     every way between the join screen, rounds, the party and the pause
+##               menu, then quits printing DEMO_SCREENS_OK (`make smoke`)
 ##   gallery     every creature lined up close to the camera (checking models)
 ##   artwork     render the Steam library images (see Artwork) and quit
 ## Add --quit-when-won to exit with the round time (balance checks).
@@ -51,6 +53,26 @@ func _ready() -> void:
 		"celebrate":
 			main.call("_start_round")
 			_script = [[0.5, _pen_everyone]]
+		"screens":
+			# The party ignores buttons until about 3.5 s after the last sheep is home.
+			main.call("_start_round")
+			_script = [
+				[0.5, _pen_everyone],
+				[5.0, func() -> void: _chaos_device.tap(&"east")],  # change players
+				[6.0, func() -> void: _chaos_device.tap(&"start")],  # play
+				[6.5, _pen_everyone],
+				[11.0, func() -> void: _chaos_device.tap(&"south")],  # play again
+				[12.0, func() -> void: _chaos_device.tap(&"start")],  # pause
+				[13.0, func() -> void: main.pause_menu.change_players.emit()],
+				[14.0, func() -> void: _chaos_device.tap(&"start")],  # play
+				[15.0, func() -> void: _chaos_device.tap(&"start")],  # pause
+				[16.0, func() -> void: main.pause_menu.restart.emit()],
+				[17.0, _pen_everyone],
+				[22.0, func() -> void: _chaos_device.tap(&"east")],  # change players
+				[25.0, func() -> void:
+					print("DEMO_SCREENS_OK")
+					get_tree().quit()],
+			]
 		"gallery":
 			_gallery()
 		"artwork":

@@ -91,6 +91,7 @@ make test       # unit tests (flock, microphone rules, cooldowns, geometry)
 make run        # play in a window (keyboard players below)
 make demo       # watch robot dogs herd while a robot chaos player causes trouble
 make balance    # time three robot rounds headless: a quick check after tuning changes
+make smoke      # export the game and click through every screen in it: run before a release
 make shots      # render screenshots without a monitor (slow on software rendering)
 make models     # rebuild the creature models with Blender
 make sounds     # rebuild the CC0 sounds and music with ffmpeg
