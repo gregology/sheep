@@ -70,7 +70,10 @@ Each tick, every loose sheep adds up a desired velocity from:
 - **calm behaviour:** stand and munch, or wander a few metres. A sheep with no
   neighbours ambles back to the flock
 - **fences:** soft avoidance, plus hard collision. Diagonal "corner cuts" (marked by hay
-  bales) stop sheep wedging into corners where no dog can get behind them
+  bales) stop sheep wedging into corners where no dog can get behind them. The triangle
+  behind each cut is solid (`Geometry.CornerCut`), so a sheep shoved in there pops back
+  out the front. A sheep pinned against a fence by a dog squeezes out sideways rather
+  than being pushed through
 - **the gate funnel:** near the gate, a gentle drift inward. It widens late in long
   rounds (`assist_after`)
 

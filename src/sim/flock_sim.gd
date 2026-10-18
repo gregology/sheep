@@ -226,8 +226,7 @@ func _step_loose(s: SheepState, dt: float) -> void:
 	var top_speed := lerpf(tuning.graze_speed, tuning.run_speed, maxf(s.fear, s.urge * 0.7))
 	desired = desired.limit_length(top_speed)
 	s.vel = s.vel.move_toward(desired, tuning.sheep_accel * (1.0 + s.fear) * dt)
-	s.pos += s.vel * dt
-	s.pos = Geometry.push_out(s.pos, tuning.sheep_radius, fences)
+	s.pos = _fence_in(s.pos + s.vel * dt)
 	if s.vel.length() > 0.15:
 		s.heading = Geometry.yaw_for(s.vel)
 
@@ -319,13 +318,30 @@ func _resolve_overlaps() -> void:
 				continue
 			var offset := s.pos - influence.position
 			var distance := offset.length()
-			if distance < reach:
-				s.pos = influence.position + (offset / distance if distance > 0.0001 else Vector2.RIGHT) * reach
+			if distance >= reach:
+				continue
+			var pushed := influence.position + (offset / distance if distance > 0.0001 else Vector2.RIGHT) * reach
+			s.pos = _fence_in(pushed)
+			# Pinned against a fence or a bale: squeeze out sideways along it, rather
+			# than staying squashed underneath whoever is pushing.
+			var blocked := s.pos - pushed
+			if blocked.length() > 0.001:
+				var along := Vector2(-blocked.y, blocked.x).normalized()
+				var side := along.dot(offset)
+				if absf(side) < 0.001:
+					side = 1.0 if s.id % 2 == 0 else -1.0
+				s.pos = _fence_in(s.pos + along * signf(side) * blocked.length())
 	for s in sheep:
 		if s.penned:
 			s.pos = pen.clamp_inside(s.pos, tuning.sheep_radius)
 		else:
-			s.pos = Geometry.push_out(s.pos, tuning.sheep_radius, fences)
+			s.pos = _fence_in(s.pos)
+
+
+## Keeps a loose sheep inside the field and clear of the fences, pen walls and bales.
+func _fence_in(p: Vector2) -> Vector2:
+	var inner := field.grow(-tuning.sheep_radius)
+	return Geometry.push_out(p.clamp(inner.position, inner.end), tuning.sheep_radius, fences)
 
 
 func _neighbour_center(s: SheepState, radius: float) -> Vector2:
