@@ -13,7 +13,7 @@ static func make(kind: StringName, options := {}) -> CreatureModel:
 	var color: Color = options.get("color", Color.WHITE)
 	var variant := StringName("dog_%s" % breed) if kind == &"dog" else kind
 	var path := "res://assets/models/%s.glb" % variant
-	if ResourceLoader.exists(path) and not "--code-models" in OS.get_cmdline_user_args():
+	if ResourceLoader.exists(path) and not LaunchArgs.has("--code-models"):
 		var model := CreatureModel.new()
 		model.name = String(variant).to_pascal_case()
 		if kind == &"dog" or kind == &"wolf":

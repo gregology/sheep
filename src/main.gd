@@ -46,11 +46,13 @@ func _ready() -> void:
 		_show_join())
 	pause_menu.open_settings.connect(_open_settings)
 	settings.closed.connect(_on_settings_closed)
+	settings.quit_requested.connect(get_tree().quit)
 	_show_join()
-	var args := OS.get_cmdline_user_args()
-	for arg in args:
-		if arg.begins_with("--demo="):
-			add_child(Demo.new(arg.get_slice("=", 1), "--quit-when-won" in args))
+	if LaunchArgs.has("--diagnose"):
+		add_child(Diagnostics.new())
+	var demo := LaunchArgs.value("--demo")
+	if demo != "":
+		add_child(Demo.new(demo, LaunchArgs.has("--quit-when-won")))
 
 
 func _show_join() -> void:
@@ -133,7 +135,4 @@ func _on_settings_closed() -> void:
 
 
 func _screenshot() -> void:
-	DirAccess.make_dir_recursive_absolute("user://screenshots")
-	var path := "user://screenshots/%s.png" % Time.get_datetime_string_from_system().replace(":", "-")
-	get_viewport().get_texture().get_image().save_png(path)
-	print("Saved ", ProjectSettings.globalize_path(path))
+	Diagnostics.screenshot(get_viewport())

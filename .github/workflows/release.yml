@@ -28,6 +28,9 @@ jobs:
       - name: Unit tests
         run: make test
 
+      - name: Click through every screen in the exported game
+        run: make smoke
+
       - name: Build and package
         run: make package VERSION=${{ github.ref_name }}
 

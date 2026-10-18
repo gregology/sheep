@@ -70,7 +70,13 @@ Each tick, every loose sheep adds up a desired velocity from:
 - **calm behaviour:** stand and munch, or wander a few metres. A sheep with no
   neighbours ambles back to the flock
 - **fences:** soft avoidance, plus hard collision. Diagonal "corner cuts" (marked by hay
-  bales) stop sheep wedging into corners where no dog can get behind them
+  bales) stop sheep wedging into corners where no dog can get behind them. The triangle
+  behind each cut is solid (`Geometry.CornerCut`), so a sheep shoved in there pops back
+  out the front. A sheep pinned against a fence by a dog squeezes out sideways rather
+  than being pushed through
+- **bolting:** a noise sends each loose sheep dashing off its own way for
+  `mic_scatter_time`, with flocking switched off while the dash fades, so the flock
+  breaks up and takes a while to drift back together
 - **the gate funnel:** near the gate, a gentle drift inward. It widens late in long
   rounds (`assist_after`)
 
@@ -169,17 +175,39 @@ manifest and rerun it.
 - `make test`: unit tests for the flock, the microphone rules, cooldowns and geometry.
 - `make balance`: robot dogs (`HerdingBot`) play three full rounds against a scripted
   chaos player and report the times. At the time of writing they win in about 1–3 minutes.
+- `make smoke`: exports the game and runs the `screens` demo in it, which goes every
+  way between the join screen, rounds, the party and the pause menu. Some bugs only
+  crash the exported game: using a node after it has been freed is just an error in the
+  editor (watch `make demo`'s output), but in the export it reads freed memory.
 - `make shots`: renders the join screen, a round and the celebration under a virtual
   display, using lavapipe (software Vulkan). The grass shader avoids a uniform that
   crashes lavapipe; see the comment in `tuft.gdshader`.
 
-## Not yet verified on the real hardware
+## On the Steam Machine
 
-These need a playtest on the Steam Machine:
+`--diagnose` (see `Diagnostics`) writes a report covering the GPU, screen, frame rate,
+controllers and every button press, and what the microphone hears. `--shots` and
+`--quit-at` let a whole check run unattended, and `LaunchArgs` reads options from a
+one-shot file, so all of this can be started through Steam over SSH (see README).
 
-- How SDL and Steam Input order and name five mixed controllers.
-- The USB mic's levels.
-- How much TV sound leaks into the mic.
+The game's log is `~/.local/share/sheep/logs/godot.log` (older runs are kept beside it
+with a timestamp). It's mostly written out as the game quits, so if the game vanished
+and its log is empty, without even the "Godot Engine" line, it crashed.
+
+Verified on 2026-10-16 (SteamOS 3.8, Navi 33 GPU, 1080p TV):
+
+- `install.sh` installs, adds the Steam shortcut and its artwork, and reinstalls cleanly.
+- Launching from Steam runs under Steam Input with real controllers hidden from SDL.
+- Holds 60 fps at 1920×1080 through a full round.
+- The game opens the USB mic through PipeWire. It's a wireless mic with a noise gate:
+  it sends exact digital zeros while the room is quiet, and real sound (and real scares)
+  when someone is loud. So the shout button is only crossed out for a mic that has sent
+  nothing but zeros since it was opened.
+
+Still to check with the hardware switched on:
+
+- How SDL and Steam Input order and name the five mixed controllers.
+- Real mic levels, calibration, and how much TV sound leaks into the mic.
 - Rumble on the small pads.
 
 ## Next

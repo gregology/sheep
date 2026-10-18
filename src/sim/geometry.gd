@@ -19,6 +19,31 @@ class Segment:
 		return a + ab * clampf((p - a).dot(ab) / length_sq, 0.0, 1.0)
 
 
+## A short wall across a corner of the field, where the hay bales sit. The little
+## triangle behind it is solid: anything shoved in there pops back out the front.
+## (A plain fence pushes things out of whichever side they're nearer, so a sheep
+## squashed past it would be trapped behind it for good.)
+class CornerCut extends Segment:
+	var corner: Vector2
+	## Unit vector from the wall out into the field.
+	var front: Vector2
+
+	func _init(from: Vector2, to: Vector2, corner_point: Vector2) -> void:
+		super(from, to)
+		corner = corner_point
+		var along := (to - from).normalized()
+		front = Vector2(-along.y, along.x)
+		if front.dot(from - corner) < 0.0:
+			front = -front
+
+	## True when p is in the triangle between the wall and the corner.
+	func is_behind(p: Vector2) -> bool:
+		var d1 := (b - a).cross(p - a)
+		var d2 := (corner - b).cross(p - b)
+		var d3 := (a - corner).cross(p - corner)
+		return (d1 >= 0.0 and d2 >= 0.0 and d3 >= 0.0) or (d1 <= 0.0 and d2 <= 0.0 and d3 <= 0.0)
+
+
 static func to_3d(p: Vector2, height := 0.0) -> Vector3:
 	return Vector3(p.x, height, p.y)
 
@@ -50,7 +75,7 @@ static func corner_cuts(field: Rect2, pen: Rect2, size := 1.6) -> Array[Segment]
 			continue
 		var u := Vector2(signf(field.get_center().x - c.x), 0)
 		var v := Vector2(0, signf(field.get_center().y - c.y))
-		cuts.append(Segment.new(c + u * size, c + v * size))
+		cuts.append(CornerCut.new(c + u * size, c + v * size, c))
 	# Where a pen wall meets the outer fence, the corner on the field side.
 	var pen_corners: Array[Vector2] = [pen.position, Vector2(pen.end.x, pen.position.y), pen.end, Vector2(pen.position.x, pen.end.y)]
 	for c in pen_corners:
@@ -66,13 +91,17 @@ static func corner_cuts(field: Rect2, pen: Rect2, size := 1.6) -> Array[Segment]
 		else:
 			u = Vector2(0, signf(c.y - pen.get_center().y))
 			v = Vector2(signf(field.get_center().x - c.x), 0)
-		cuts.append(Segment.new(c + u * size, c + v * size))
+		cuts.append(CornerCut.new(c + u * size, c + v * size, c))
 	return cuts
 
 
 ## Moves a circle out of any segments it overlaps.
 static func push_out(p: Vector2, radius: float, segments: Array[Segment]) -> Vector2:
 	for segment in segments:
+		var cut := segment as CornerCut
+		if cut and cut.is_behind(p):
+			p += cut.front * (radius - (p - cut.a).dot(cut.front))
+			continue
 		var closest := segment.closest_point(p)
 		var offset := p - closest
 		var distance := offset.length()

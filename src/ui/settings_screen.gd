@@ -4,6 +4,7 @@ extends CanvasLayer
 ## numbers and volumes. Changes apply straight away and are saved on close.
 
 signal closed
+signal quit_requested
 
 var _rows: VBoxContainer
 var _first_focus: Control
@@ -40,6 +41,9 @@ class MicLevelBar:
 		draw_rect(Rect2(Vector2(0, 50), Vector2(size.x * detector.alertness, 10)), UiKit.SUN)
 		if not Mic.available:
 			UiKit.draw_text(self, get_theme_default_font(), Vector2(0, 34), "No microphone found", 26, UiKit.CREAM, size.x)
+		elif Mic.is_silent():
+			UiKit.draw_text(self, get_theme_default_font(), Vector2(0, 34),
+				"No sound from the microphone yet: is it switched on, or muted?", 24, UiKit.CREAM, size.x)
 
 
 func _ready() -> void:
@@ -104,6 +108,7 @@ func _build() -> void:
 	_slider("Sensitivity", 0, 24, 1, 30.0 - t.mic_threshold_db, func(v: float) -> void: t.mic_threshold_db = 30.0 - v)
 	_slider("Gets used to noise after (s)", 0.3, 5.0, 0.1, t.mic_habituation_time, func(v: float) -> void: t.mic_habituation_time = v)
 	_slider("Tires of shouting (per scare)", 0.0, 0.8, 0.05, t.mic_alertness_cost, func(v: float) -> void: t.mic_alertness_cost = v)
+	_slider("Shouts scatter sheep for (s)", 0.2, 3.0, 0.1, t.mic_scatter_time, func(v: float) -> void: t.mic_scatter_time = v)
 	var calibrate := MenuStyle.button("Calibrate (stay quiet, then listen)", 30)
 	calibrate.pressed.connect(_calibrate)
 	_calibrate_status = UiKit.label("Sets how quiet the room is and how loud the game sounds at the mic.", 22)
@@ -147,10 +152,22 @@ func _build() -> void:
 		Sfx.play(&"baa"))
 	_row("", reload)
 
+	_section("This machine")
+	var summary := UiKit.label(Diagnostics.system_summary(), 20)
+	summary.horizontal_alignment = HORIZONTAL_ALIGNMENT_LEFT
+	summary.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	summary.custom_minimum_size = Vector2(1100, 0)
+	_rows.add_child(summary)
+
 	var buttons := HBoxContainer.new()
 	buttons.alignment = BoxContainer.ALIGNMENT_CENTER
 	buttons.add_theme_constant_override("separation", 30)
 	_rows.add_child(buttons)
+	var quit := MenuStyle.button("Quit game")
+	quit.pressed.connect(func() -> void:
+		Settings.save()
+		quit_requested.emit())
+	buttons.add_child(quit)
 	var reset := MenuStyle.button("Reset to defaults")
 	reset.pressed.connect(func() -> void:
 		Settings.reset_to_defaults()
@@ -219,15 +236,33 @@ func _device_picker() -> void:
 	var picker := OptionButton.new()
 	picker.add_theme_font_size_override("font_size", 24)
 	picker.custom_minimum_size = Vector2(560, 56)
+	# Device names can be very long; don't let one stretch the menu off the screen.
+	picker.fit_to_longest_item = false
+	picker.clip_text = true
 	var devices := AudioServer.get_input_device_list()
 	for i in devices.size():
-		picker.add_item(devices[i])
+		picker.add_item(_device_label(devices[i]))
 		if devices[i] == Settings.tuning.mic_device:
 			picker.select(i)
 	picker.item_selected.connect(func(index: int) -> void:
 		Settings.tuning.mic_device = devices[index]
 		Settings.save())
 	_row("Microphone", picker)
+
+
+## A readable name for an audio device:
+## "alsa_input.usb-Jieli_Technology_USB_Composite_Device_4150353832363911-00.mono-fallback"
+## becomes "Jieli Technology USB Composite Device".
+static func _device_label(device: String) -> String:
+	var label := device
+	for prefix in ["alsa_loopback_device.", "alsa_input.", "usb-"]:
+		label = label.trim_prefix(prefix)
+	if label.begins_with("pci-"):
+		return "Built-in sound input"
+	label = label.get_slice(".", 0)  # ".mono-fallback", ".analog-stereo"...
+	var serial := RegEx.create_from_string("([_-][0-9A-Fa-f]{6,})?(-\\d+)?$")
+	label = serial.sub(label, "").replace("_", " ").strip_edges()
+	return label if label != "" else device
 
 
 func _calibrate() -> void:

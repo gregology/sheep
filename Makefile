@@ -3,7 +3,7 @@ GODOT ?= .tools/godot
 VERSION ?= $(shell git describe --tags --always --dirty 2>/dev/null || echo dev)
 DEMO ?= round
 
-.PHONY: help import test run demo balance shots models sounds export package clean
+.PHONY: help import test run demo balance smoke shots models sounds artwork export package clean
 
 help: ## Show this list
 	@grep -E '^[a-z-]+:.*## ' $(MAKEFILE_LIST) | awk -F':.*## ' '{printf "  make %-9s %s\n", $$1, $$2}'
@@ -28,12 +28,20 @@ balance: import ## Time three robot-herded rounds, headless
 		$(GODOT) --headless --path . --fixed-fps 60 --quit-after 36000 -- --demo=round --quit-when-won 2>/dev/null | grep DEMO_WON || echo "round $$i: not won in 10 minutes"; \
 	done
 
+smoke: export ## Click through every screen in the exported game (crashes only it can have)
+	@build/linux/sheep.x86_64 --headless --fixed-fps 60 -- --demo=screens 2>/dev/null | grep -q DEMO_SCREENS_OK \
+		&& echo "smoke: every screen change worked" \
+		|| { echo "smoke: the exported game crashed or stopped early"; exit 1; }
+
 shots: import ## Render screenshots of each demo scene into build/shots
 	tools/screenshots.sh build/shots
 
 models: ## Rebuild the creature models with Blender (assets/models/*.glb)
 	tools/blender/build_models.sh
 	$(MAKE) import
+
+artwork: import ## Render the Steam library artwork from the game (dist/steam/)
+	tools/make_artwork.sh
 
 sounds: ## Rebuild the CC0 sound effects and music with ffmpeg (assets/audio/)
 	python3 tools/audio/build_sounds.py

@@ -44,8 +44,7 @@ func _ready() -> void:
 func show_round(game: Game) -> void:
 	_game = game
 	_pen_counter.reset(game.sim.sheep.size())
-	for child in _chaos_row.get_children():
-		child.queue_free()
+	_clear_chaos_row()
 	_chaos_row.add_child(MicMeter.new())
 	if game.chaos:
 		for ability in game.chaos.roster.abilities:
@@ -55,9 +54,18 @@ func show_round(game: Game) -> void:
 	visible = true
 
 
+## The creature buttons go too: they use the round's chaos controller, which is
+## freed when the next round or the join screen resets the meadow. Touching a freed
+## object is only an error in the editor; in the exported game it crashes.
 func hide_round() -> void:
 	visible = false
 	_game = null
+	_clear_chaos_row()
+
+
+func _clear_chaos_row() -> void:
+	for child in _chaos_row.get_children():
+		child.queue_free()
 
 
 func _process(_delta: float) -> void:

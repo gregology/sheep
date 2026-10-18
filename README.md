@@ -28,7 +28,8 @@ for how it works and how to add things.
   flock by itself, so something fun always happens. On screen, the creature buttons show a
   grey wedge while they recharge and a sparkle when they're ready.
 - **Pause:** press Start. **Grown-ups' settings:** hold Back/Select for a second, or press
-  Esc or F1. Settings cover the microphone, chaos timings, flock size and volumes.
+  Esc or F1. Settings cover the microphone, chaos timings, flock size and volumes. In
+  menus, the D-pad moves, the bottom face button picks, and the right one goes back.
 
 ### First time: calibrate the microphone
 
@@ -50,15 +51,16 @@ Releases are built by GitHub Actions (see "Making a release" below).
    download `sheep-vX.Y.Z-linux.tar.gz` from the repository's Releases page.
 2. Extract it, open the `sheep` folder in a terminal (Konsole) and run `./install.sh`.
    It installs to `~/Games/sheep`, adds an app-menu entry and, on SteamOS, adds the
-   game to Steam (it appears under **Library > Non-Steam**). If it can't, add it by hand:
-   Steam > Games > Add a Non-Steam Game to My Library > Sheep!
+   game to Steam (it appears under **Library > Non-Steam**) along with its library
+   artwork, which Steam shows after its next restart. If it can't add the game, add it
+   by hand: Steam > Games > Add a Non-Steam Game to My Library > Sheep!
 3. Back in Game Mode, open the game's **controller settings** and pick the **Gamepad**
    layout for the Steam Controllers. This stops the trackpads acting as a mouse.
 4. Make sure the USB microphone is the input device in SteamOS (Settings > Audio), or
    choose it in the game's grown-ups' settings. Then calibrate (above).
 
-**Updating:** save a read-only GitHub token once (instructions at the top of
-`~/Games/sheep/update.sh`), then run `~/Games/sheep/update.sh` from Desktop Mode.
+**Updating:** run `~/Games/sheep/update.sh` (from Desktop Mode, or over SSH). It
+downloads the newest release and reinstalls.
 
 **Family sounds:** drop `.wav`/`.ogg`/`.mp3` recordings into
 `~/.local/share/sheep/family_sounds/<sound>/`. The sound names are `bark`, `baa`, `howl`,
@@ -67,6 +69,17 @@ built-in sounds; with several files in a folder, one is picked at random each ti
 For music, put `menu.ogg` (join screen) and/or `round.ogg` (playing) in
 `family_sounds/music/`; a single file of any name is used for both. Press "Reload family sounds"
 in settings. These recordings stay on the Steam Machine and are never committed.
+
+### If something isn't working
+
+**Grown-ups' settings > This machine** lists the GPU, screen, the controllers the
+game can see and the microphone's state.
+
+- If the shout button (the sheep at the bottom left during a round) is crossed out, the
+  microphone wasn't found or hasn't sent any sound yet. Check it's plugged in, switched
+  on (wireless mics have a transmitter) and not muted, then shout once.
+- The game only sees Steam Controllers when Steam launches it, so start it from the
+  Steam library rather than from Desktop Mode's app menu.
 
 ## Development
 
@@ -78,9 +91,11 @@ make test       # unit tests (flock, microphone rules, cooldowns, geometry)
 make run        # play in a window (keyboard players below)
 make demo       # watch robot dogs herd while a robot chaos player causes trouble
 make balance    # time three robot rounds headless: a quick check after tuning changes
+make smoke      # export the game and click through every screen in it: run before a release
 make shots      # render screenshots without a monitor (slow on software rendering)
 make models     # rebuild the creature models with Blender
 make sounds     # rebuild the CC0 sounds and music with ffmpeg
+make artwork    # render the Steam library artwork from the game
 make package    # export the Linux build and make the release tarball
 ```
 
@@ -89,6 +104,21 @@ make package    # export the Linux build and make the release tarball
 Keyboard players for testing: **WASD** + Space/E/Q/R, **IJKL** + U/O/Y/P, and
 **arrows** + `.` `/` `,` `;`. Enter is Start and Tab is Back on all three.
 **F2** and **F3** fake a small and a big shout, and **F12** saves a screenshot.
+
+### Testing on the Steam Machine over SSH
+
+Steam can't easily pass options to a non-Steam game, so for one launch the game also
+reads them from `~/.local/share/sheep/next_launch_args.txt` (the file is deleted
+once read):
+
+```sh
+ssh deck@steam-machine
+echo '--diagnose --demo=round --shots=5,20 --quit-at=30' > ~/.local/share/sheep/next_launch_args.txt
+steam steam://rungameid/<id>   # or start it from the library
+cat ~/.local/share/sheep/diagnostics.txt   # GPU, frame rate, controllers and presses, microphone
+```
+
+Screenshots land in `~/.local/share/sheep/screenshots/` (F12 saves one any time).
 
 ### Making a release
 

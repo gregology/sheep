@@ -5,7 +5,10 @@ extends Node
 ##   join        robots join (two dogs + chaos) and wait on the join screen
 ##   round       robot dogs herd while a robot chaos player causes trouble
 ##   celebrate   a round where every sheep is already home
+##   screens     every way between the join screen, rounds, the party and the pause
+##               menu, then quits printing DEMO_SCREENS_OK (`make smoke`)
 ##   gallery     every creature lined up close to the camera (checking models)
+##   artwork     render the Steam library images (see Artwork) and quit
 ## Add --quit-when-won to exit with the round time (balance checks).
 
 var scenario := ""
@@ -50,8 +53,31 @@ func _ready() -> void:
 		"celebrate":
 			main.call("_start_round")
 			_script = [[0.5, _pen_everyone]]
+		"screens":
+			# The party ignores buttons until about 3.5 s after the last sheep is home.
+			main.call("_start_round")
+			_script = [
+				[0.5, _pen_everyone],
+				[5.0, func() -> void: _chaos_device.tap(&"east")],  # change players
+				[6.0, func() -> void: _chaos_device.tap(&"start")],  # play
+				[6.5, _pen_everyone],
+				[11.0, func() -> void: _chaos_device.tap(&"south")],  # play again
+				[12.0, func() -> void: _chaos_device.tap(&"start")],  # pause
+				[13.0, func() -> void: main.pause_menu.change_players.emit()],
+				[14.0, func() -> void: _chaos_device.tap(&"start")],  # play
+				[15.0, func() -> void: _chaos_device.tap(&"start")],  # pause
+				[16.0, func() -> void: main.pause_menu.restart.emit()],
+				[17.0, _pen_everyone],
+				[22.0, func() -> void: _chaos_device.tap(&"east")],  # change players
+				[25.0, func() -> void:
+					print("DEMO_SCREENS_OK")
+					get_tree().quit()],
+			]
 		"gallery":
 			_gallery()
+		"artwork":
+			main.join.visible = false
+			add_child(Artwork.new(game))
 
 
 func _physics_process(delta: float) -> void:
@@ -60,7 +86,7 @@ func _physics_process(delta: float) -> void:
 	if quit_when_won and int(before / 30.0) != int(_time / 30.0):
 		var game: Game = main.game
 		print("DEMO_PROGRESS t=%ds penned=%d/%d" % [int(_time), game.sim.penned_count(), game.sim.sheep.size()])
-		if OS.is_debug_build() and "--verbose-demo" in OS.get_cmdline_user_args():
+		if LaunchArgs.has("--verbose-demo"):
 			var loose := game.sim.loose_sheep().map(func(s: SheepState) -> String: return "(%.1f,%.1f)" % [s.pos.x, s.pos.y])
 			var dogs := game.dogs.map(func(d: Dog) -> String: return "(%.1f,%.1f)" % [d.pos.x, d.pos.y])
 			print("   loose=%s dogs=%s" % [", ".join(loose), ", ".join(dogs)])
