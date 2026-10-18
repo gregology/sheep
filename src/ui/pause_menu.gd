@@ -1,6 +1,7 @@
 class_name PauseMenu
 extends CanvasLayer
-## Start pauses the round. Ordinary buttons, navigated with any D-pad.
+## Start pauses the round. Ordinary buttons: any D-pad moves, south presses,
+## and east or Start carries on playing.
 
 signal resume
 signal restart
@@ -50,6 +51,12 @@ func _button(parent: Container, text: String, pressed_signal: Signal) -> Button:
 	button.pressed.connect(func() -> void: pressed_signal.emit())
 	parent.add_child(button)
 	return button
+
+
+func _unhandled_input(event: InputEvent) -> void:
+	if visible and event.is_action_pressed("ui_cancel"):
+		get_viewport().set_input_as_handled()
+		resume.emit()
 
 
 func _physics_process(_delta: float) -> void:

@@ -28,7 +28,8 @@ for how it works and how to add things.
   flock by itself, so something fun always happens. On screen, the creature buttons show a
   grey wedge while they recharge and a sparkle when they're ready.
 - **Pause:** press Start. **Grown-ups' settings:** hold Back/Select for a second, or press
-  Esc or F1. Settings cover the microphone, chaos timings, flock size and volumes.
+  Esc or F1. Settings cover the microphone, chaos timings, flock size and volumes. In
+  menus, the D-pad moves, the bottom face button picks, and the right one goes back.
 
 ### First time: calibrate the microphone
 

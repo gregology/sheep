@@ -12,6 +12,7 @@ var _joypads := {}  # SDL joypad index -> JoypadDevice
 func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
 	process_physics_priority = -100
+	_bind_menu_buttons()
 	for i in KeyboardDevice.SCHEMES.size():
 		devices.append(KeyboardDevice.new(i))
 	for index in Input.get_connected_joypads():
@@ -32,6 +33,17 @@ func add_device(device: InputDevice) -> void:
 
 func joypads() -> Array[InputDevice]:
 	return devices.filter(func(d: InputDevice) -> bool: return not d.is_keyboard())
+
+
+## Out of the box, Godot's menus move with the D-pad but only press buttons and go
+## back from the keyboard. Let every controller's south button press the selected
+## button and east go back, as they do everywhere else in the game.
+func _bind_menu_buttons() -> void:
+	for binding in [[&"ui_accept", &"south"], [&"ui_cancel", &"east"]]:
+		var event := InputEventJoypadButton.new()
+		event.device = -1  # any controller
+		event.button_index = JoypadDevice.BUTTON_MAP[binding[1]]
+		InputMap.action_add_event(binding[0], event)
 
 
 func _on_joy_connection_changed(index: int, connected: bool) -> void:
